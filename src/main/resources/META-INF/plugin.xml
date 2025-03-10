@@ -22,8 +22,8 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <statusBarWidgetFactory implementation="VariableTypeStatusBarWidgetFactory"
-                                id="PyCharmVariableTypeWidget"
-                                />
+        <statusBarWidgetFactory implementation="com.expample.VariableTypeStatusBarWidgetFactory"
+                                id="com.expample.VariableTypeStatusBarWidget"
+        />
     </extensions>
 </idea-plugin>

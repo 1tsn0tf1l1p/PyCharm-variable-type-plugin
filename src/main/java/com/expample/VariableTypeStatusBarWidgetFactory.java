@@ -1,3 +1,5 @@
+package com.expample;
+
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.openapi.wm.StatusBarWidget;
@@ -8,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class VariableTypeStatusBarWidgetFactory implements StatusBarWidgetFactory {
     @Override
     public @NotNull @NonNls String getId() {
-        return "VariableTypeStatusBarWidget";
+        return "com.expample.VariableTypeStatusBarWidget";
     }
 
     @Override
@@ -18,7 +20,7 @@ public class VariableTypeStatusBarWidgetFactory implements StatusBarWidgetFactor
 
     @Override
     public @NotNull StatusBarWidget createWidget(@NotNull Project project) {
-        return null;
+        return new VariableTypeStatusBarWidget(project);
     }
 
     @Override
