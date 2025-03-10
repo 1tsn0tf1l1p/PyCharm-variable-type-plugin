@@ -9,6 +9,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiFile;
+import com.jetbrains.python.psi.PyElement;
+import com.jetbrains.python.psi.PyFile;
+import com.jetbrains.python.psi.PyTargetExpression;
+import com.jetbrains.python.psi.types.PyType;
+import com.jetbrains.python.psi.types.TypeEvalContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,27 +46,74 @@ public class VariableTypeStatusBarWidget implements StatusBarWidget, StatusBarWi
     }
 
     private void updateType(Editor editor) {
+        int offset = editor.getCaretModel().getOffset();
+        PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
+        if (!(psiFile instanceof PyFile)) {
+            currentText = "";
+            if (statusBar != null) {
+                statusBar.updateWidget(ID());
+                return;
+            }
+        }
 
+        PyElement element = (PyElement) psiFile.findElementAt(offset);
+        if (element == null) {
+            currentText = "";
+            if (statusBar != null) {
+                statusBar.updateWidget(ID());
+            }
+            return;
+        }
+        PyTargetExpression targetExpression = findParentTargetExpression(element);
+        if (targetExpression != null) {
+            TypeEvalContext context = TypeEvalContext.userInitiated(project, psiFile);
+            PyType pyType = context.getType(targetExpression);
+            currentText = (pyType != null) ? pyType.getName() : "";
+        } else {
+            currentText = "";
+        }
+
+        if (statusBar != null) {
+            statusBar.updateWidget(ID());
+        }
+    }
+
+    private PyTargetExpression findParentTargetExpression(PyElement element) {
+        PyElement current = element;
+        while (current != null) {
+            if (current instanceof PyTargetExpression) {
+                return (PyTargetExpression) current;
+            }
+            current = (PyElement) current.getParent();
+        }
+        return null;
     }
 
 
     @Override
     public @NotNull String ID() {
-        return "";
+        return "VariableTypeStatusBarWidget";
     }
 
     @Override
     public float getAlignment() {
-        return 0;
+        return 0.5f;
     }
 
     @Override
     public @NotNull String getText() {
-        return "";
+        return currentText.isEmpty() ? "" : "Type: " + currentText;
     }
 
     @Override
     public @Nullable String getTooltipText() {
-        return "";
+        return currentText.isEmpty() ? null : "Variable type.";
+    }
+
+
+
+    @Override
+    public void install(@NotNull StatusBar statusBar) {
+        this.statusBar = statusBar;
     }
 }
